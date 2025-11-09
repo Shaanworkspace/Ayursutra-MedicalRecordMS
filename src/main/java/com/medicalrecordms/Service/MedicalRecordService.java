@@ -1,7 +1,9 @@
 package com.medicalrecordms.Service;
 
 
+import com.medicalrecordms.DTO.Request.MedicalRecordRequestDTO;
 import com.medicalrecordms.DTO.Response.MedicalRecordResponseDTO;
+import com.medicalrecordms.ENUM.Status;
 import com.medicalrecordms.Entity.MedicalRecord;
 import com.medicalrecordms.Repository.MedicalRecordRepository;
 import jakarta.transaction.Transactional;
@@ -189,5 +191,20 @@ public class MedicalRecordService {
     public void deleteMedicalRecord(Long recordId) {
         MedicalRecord record = getMedicalRecordById(recordId);
         medicalRecordRepository.delete(record);
+    }
+
+    public MedicalRecord createFromPatientRequest(MedicalRecordRequestDTO dto) {
+        MedicalRecord record = MedicalRecord.builder()
+                .patientId(dto.getPatientId())
+                .doctorId(dto.getDoctorId())
+                .visitDate(dto.getVisitDate())
+                .symptoms(dto.getSymptoms())
+                .allergies(dto.getAllergies())
+                .medicalHistoryNotes(dto.getMedicalHistoryNotes())
+                .medications(dto.getMedications())
+                .followUpRequired(dto.getFollowUpRequired())
+                .status(Status.PENDING)
+                .build();
+        return medicalRecordRepository.save(record);
     }
 }

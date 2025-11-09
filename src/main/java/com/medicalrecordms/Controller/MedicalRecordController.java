@@ -1,5 +1,6 @@
 package com.medicalrecordms.Controller;
 
+import com.medicalrecordms.DTO.Request.MedicalRecordRequestDTO;
 import com.medicalrecordms.DTO.Request.TherapyUpdateRequest;
 import com.medicalrecordms.DTO.Response.MedicalRecordResponseDTO;
 import com.medicalrecordms.Entity.MedicalRecord;
@@ -55,15 +56,10 @@ public class MedicalRecordController {
     // ======================================
 
     /** Create a medical record (patient + doctor passed in) */
-    @PostMapping
-    public ResponseEntity<?> createMedicalRecord(@RequestParam Long patientId,
-                                                 @RequestBody MedicalRecord record) {
-        try {
-            MedicalRecord saved = medicalRecordService.createMedicalRecord(patientId, record);
-            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("❌ " + e.getMessage());
-        }
+    @PostMapping("/byPatient")
+    public ResponseEntity<Long> createMedicalRecord(@RequestBody MedicalRecordRequestDTO dto) {
+        MedicalRecord saved = medicalRecordService.createFromPatientRequest(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved.getId());
     }
 
     // ======================================
