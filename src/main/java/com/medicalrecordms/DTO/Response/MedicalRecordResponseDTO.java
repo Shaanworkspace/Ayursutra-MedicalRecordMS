@@ -1,5 +1,6 @@
 package com.medicalrecordms.DTO.Response;
 
+import com.medicalrecordms.ENUM.Status;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,7 +33,7 @@ public class MedicalRecordResponseDTO {
     private String therapyName;
     private LocalDate startDate;
     private LocalDate endDate;
-    private String status;
+    private Status status;
     private Integer noOfDays;
     private String doctorNotes;
     private Double rating;

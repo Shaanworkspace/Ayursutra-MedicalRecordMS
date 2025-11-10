@@ -3,6 +3,7 @@ package com.medicalrecordms.Controller;
 import com.medicalrecordms.DTO.Request.MedicalRecordRequestDTO;
 import com.medicalrecordms.DTO.Request.TherapyUpdateRequest;
 import com.medicalrecordms.DTO.Response.MedicalRecordResponseDTO;
+import com.medicalrecordms.ENUM.Status;
 import com.medicalrecordms.Entity.MedicalRecord;
 import com.medicalrecordms.Service.MedicalRecordService;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/medical-records")
@@ -31,23 +33,26 @@ public class MedicalRecordController {
 
     /** Get record by ID */
     @GetMapping("/{recordId}")
-    public ResponseEntity<?> getRecordById(@PathVariable Long recordId) {
+    public ResponseEntity<MedicalRecordResponseDTO> getRecordById(@PathVariable Long recordId) {
         try {
-            return ResponseEntity.ok(medicalRecordService.getMedicalRecordById(recordId));
+            MedicalRecordResponseDTO record = medicalRecordService.getMedicalRecordById(recordId);
+            return ResponseEntity.ok(record);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Oops !! " + e.getMessage());
+            // If the record isn’t found, return 404 with an error message
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
+
     /** Get all records for a patient */
     @GetMapping("/patient")
-    public ResponseEntity<List<MedicalRecord>> getRecordsByPatient(@RequestParam  Long patientId) {
+    public ResponseEntity<List<MedicalRecordResponseDTO>> getRecordsByPatient(@RequestParam  Long patientId) {
         return ResponseEntity.ok(medicalRecordService.getMedicalRecordsByPatient(patientId));
     }
 
     /** Get all records for a doctor */
     @GetMapping("/doctor")
-    public ResponseEntity<List<MedicalRecord>> getRecordsByDoctor(@RequestParam Long doctorId) {
+    public ResponseEntity<List<MedicalRecordResponseDTO>> getRecordsByDoctor(@RequestParam Long doctorId) {
         return ResponseEntity.ok(medicalRecordService.getMedicalRecordsByDoctor(doctorId));
     }
 
@@ -79,7 +84,41 @@ public class MedicalRecordController {
             );
             return ResponseEntity.ok(updated);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("❌ " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No!!! " + e.getMessage());
+        }
+    }
+    @PutMapping("/status-change/{id}")
+    public ResponseEntity<Map<String,Object>> changeStatus(@PathVariable Long id, @RequestParam String status, @RequestParam Long doctorId){
+        try{
+            Status newStatus = Status.fromValue(status); // Convert string --> enum safely (case-insensitive)
+
+            medicalRecordService.updateStatus(id,newStatus,doctorId);
+
+            Map<String, Object> response = Map.of(
+                    "id", id,
+                    "doctorId", doctorId,
+                    "status", newStatus.name()
+            );
+
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e){
+            Map<String, Object> error = Map.of(
+                    "success", false,
+                    "error", "Invalid status or unauthorized doctor",
+                    "message", e.getMessage()
+            );
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(error);
+        } catch (Exception e) {
+            Map<String, Object> error = Map.of(
+                    "success", false,
+                    "error", "Record not found",
+                    "message", "Record not found for ID: " + id
+            );
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(error);
         }
     }
 
