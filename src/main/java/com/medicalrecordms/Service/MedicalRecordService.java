@@ -4,6 +4,7 @@ import com.medicalrecordms.DTO.Request.MedicalRecordRequestDTO;
 import com.medicalrecordms.DTO.Response.MedicalRecordResponseDTO;
 import com.medicalrecordms.ENUM.Status;
 import com.medicalrecordms.Entity.MedicalRecord;
+import com.medicalrecordms.Messaging.MedicalRecordMessageProducer;
 import com.medicalrecordms.Repository.MedicalRecordRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 public class MedicalRecordService {
 
     private final MedicalRecordRepository medicalRecordRepository;
+
     private final Logger logger = Logger.getLogger(MedicalRecordService.class.getName());
 
     // Create new medical record
@@ -50,7 +52,7 @@ public class MedicalRecordService {
     public List<MedicalRecordResponseDTO> getAllMedicalRecords() {
         return medicalRecordRepository.findAll()
                 .stream()
-                .map(this::convertToDTO)
+                .map(this::medicalRecordConvertToMedicalRecordResponseDTO)
                 .collect(Collectors.toList());
     }
 
@@ -58,14 +60,14 @@ public class MedicalRecordService {
     public MedicalRecordResponseDTO getMedicalRecordById(Long recordId) {
         MedicalRecord record = medicalRecordRepository.findById(recordId)
                 .orElseThrow(() -> new IllegalArgumentException("Medical Record not found with ID: " + recordId));
-        return convertToDTO(record);
+        return medicalRecordConvertToMedicalRecordResponseDTO(record);
     }
 
     // Get records by patient
     public List<MedicalRecordResponseDTO> getMedicalRecordsByPatient(Long patientId) {
         return medicalRecordRepository.findByPatientId(patientId)
                 .stream()
-                .map(this::convertToDTO)
+                .map(this::medicalRecordConvertToMedicalRecordResponseDTO)
                 .collect(Collectors.toList());
     }
 
@@ -73,12 +75,12 @@ public class MedicalRecordService {
     public List<MedicalRecordResponseDTO> getMedicalRecordsByDoctor(Long doctorId) {
         return medicalRecordRepository.findByDoctorId(doctorId)
                 .stream()
-                .map(this::convertToDTO)
+                .map(this::medicalRecordConvertToMedicalRecordResponseDTO)
                 .collect(Collectors.toList());
     }
 
     // Convert entity to DTO
-    private MedicalRecordResponseDTO convertToDTO(MedicalRecord record) {
+    public MedicalRecordResponseDTO medicalRecordConvertToMedicalRecordResponseDTO(MedicalRecord record) {
         return new MedicalRecordResponseDTO(
                 record.getId(),
                 record.getVisitDate(),
@@ -96,6 +98,21 @@ public class MedicalRecordService {
                 record.getNoOfDays(),
                 record.getDoctorNotes(),
                 record.getRating()
+        );
+    }
+
+    // Convert entity to DTO
+    public MedicalRecordRequestDTO medicalRecordConvertToMedicalRecordRequestDTO(MedicalRecord record) {
+        return new MedicalRecordRequestDTO(
+                record.getId(),
+                record.getPatientId(),
+                record.getDoctorId(),
+                record.getVisitDate(),
+                record.getSymptoms(),
+                record.getAllergies(),
+                record.getMedicalHistoryNotes(),
+                record.getMedications(),
+                record.getFollowUpRequired()
         );
     }
 
@@ -166,6 +183,8 @@ public class MedicalRecordService {
                 .followUpRequired(dto.getFollowUpRequired())
                 .status(Status.PENDING)
                 .build();
+
+
 
         return medicalRecordRepository.save(record);
     }

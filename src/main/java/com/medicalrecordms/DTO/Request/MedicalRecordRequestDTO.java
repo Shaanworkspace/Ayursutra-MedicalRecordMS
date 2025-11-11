@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class MedicalRecordRequestDTO {
-
+    private Long medicalRecordId;
     private Long patientId;              // ID of the patient booking the appointment
     private Long doctorId;               // ID of the doctor being booked
 

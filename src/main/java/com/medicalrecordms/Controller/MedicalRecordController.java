@@ -5,6 +5,7 @@ import com.medicalrecordms.DTO.Request.TherapyUpdateRequest;
 import com.medicalrecordms.DTO.Response.MedicalRecordResponseDTO;
 import com.medicalrecordms.ENUM.Status;
 import com.medicalrecordms.Entity.MedicalRecord;
+import com.medicalrecordms.Messaging.MedicalRecordMessageProducer;
 import com.medicalrecordms.Service.MedicalRecordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,7 @@ import java.util.Map;
 public class MedicalRecordController {
 
     private final MedicalRecordService medicalRecordService;
-
+    private final MedicalRecordMessageProducer medicalRecordMessageProducer;
     // ======================================
     //              GET METHODS
     // ======================================
@@ -64,6 +65,10 @@ public class MedicalRecordController {
     @PostMapping("/byPatient")
     public ResponseEntity<Long> createMedicalRecord(@RequestBody MedicalRecordRequestDTO dto) {
         MedicalRecord saved = medicalRecordService.createFromPatientRequest(dto);
+        /*
+        Message through RabbitMQ to update medical record to doctor
+         */
+        medicalRecordMessageProducer.sendRecord(saved);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved.getId());
     }
 
