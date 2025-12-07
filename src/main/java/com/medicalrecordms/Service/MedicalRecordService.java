@@ -91,7 +91,7 @@ public class MedicalRecordService {
                 record.getDoctorId(),
                 record.getTherapistId(),
                 record.getCreatedDate(),
-                record.getTherapyName(),
+                record.getTherapyAssigned(),
                 record.getStartDate(),
                 record.getEndDate(),
                 record.getStatus() != null ? record.getStatus() : null,

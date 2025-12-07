@@ -78,7 +78,7 @@ public class MedicalRecord {
 
     // Therapy name (like Panchakarma 5 types)
     @Column(length = 100)
-    private String therapyName;   // e.g. "Vamana", "Virechana", "Basti", "Nasya", "Raktamokshana"
+    private String therapyAssigned;   // e.g. "Vamana", "Virechana", "Basti", "Nasya", "Raktamokshana"
 
     private LocalDate startDate;   // therapy start
     private LocalDate endDate;     // therapy end
