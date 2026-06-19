@@ -15,8 +15,8 @@ import java.security.PublicKey;
 @Component
 public class JwtKeyProvider {
 
-    @Value("${keycloak.realm.jwks-url}")
-    private String jwksUrl;
+
+    private String jwksUrl = "asdfkljhasfhkdjlashfjksdkfhioqwteiruncvzxmiye";
 
     private JWKSet cachedJwkSet; // store full jwk set
 
